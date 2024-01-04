@@ -1,57 +1,29 @@
 from .models import BookObject
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from .serializer import BookSerializer
 from django.shortcuts import get_object_or_404
-
 from rest_framework.views import APIView
 from rest_framework import status
+from django.core.paginator import Paginator, EmptyPage
 
 # Create your views here.
-
-# @api_view(['GET'])
-# def book_list(request):
-#     bookObjects = Book.objects.all()
-#     serializer = BookSerializer(bookObjects, many=True)
-#     return Response(serializer.data)
-
-
-# @api_view(['POST'])
-# def book_create(request):
-#     serializer = BookSerializer(data=request.data)
-#     if serializer.is_valid():
-#         serializer.save()
-#         return Response(serializer.data)
-#     else:
-#         return Response(serializer.errors)
-    
-# @api_view(['GET', 'PUT', 'DELETE'])
-# def book(request, pk=None):
-#     bookObject = get_object_or_404(Book, pk=pk)
-
-#     if request.method == 'GET':
-#         serializer = BookSerializer(bookObject)
-#         return Response(serializer.data)
-    
-#     if request.method == 'PUT':
-#         serializer = BookSerializer(bookObject, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-#         else:
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-#     if request.method == 'DELETE':
-#         bookObject.delete()
-#         return Response(
-#             {
-#                 'detail': 'Book Deleted.'
-#             }
-#         )
 
 class BookList(APIView):
     def get(self,request):
         bookObjects = BookObject.objects.all()
+        search = request.query_params.get('search')
+        perPage = request.query_params.get('perpage', default=2)
+        page = request.query_params.get('page', default=1)
+
+        if search:
+            bookObjects = bookObjects.filter(title__icontains=search)
+
+        paginator = Paginator(bookObjects, per_page=perPage)
+        try:
+            bookObjects = paginator.page(number=page)
+        except EmptyPage:
+            bookObjects = []
+
         serializer = BookSerializer(bookObjects, many=True)
         return Response(serializer.data)
     
