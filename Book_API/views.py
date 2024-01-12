@@ -1,30 +1,31 @@
 from .models import BookObject
 from rest_framework.response import Response
 from .serializer import BookSerializer
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 
+TEMPLATE_DIRS = (
+    'os.path.join(BASE_DIR, "templates"),'
+)
+
 # Create your views here.
 
 class BookList(APIView):
     def get(self,request):
-        bookObjects = BookObject.objects.all().order_by('pk')
+        bookObjects = BookObject.objects.all().order_by('title')
 
         # Getting search parameters
-        searchTitle = request.query_params.get('search')
-        searchAuthor = request.query_params.get('author')
+        searchQuery = request.query_params.get('search')
         perPage = request.query_params.get('perpage', default=2)
 
         # Filtering
         filter_conditions = Q()
 
-        if searchTitle:
-            filter_conditions &= Q(title__icontains=searchTitle)
-        if searchAuthor:
-            filter_conditions &= Q(author__icontains=searchAuthor)
+        if searchQuery:
+            filter_conditions |= Q(title__icontains=searchQuery) | Q(author__icontains=searchQuery)
 
         bookObjects = bookObjects.filter(filter_conditions)
 
@@ -38,22 +39,28 @@ class BookList(APIView):
         serializer = BookSerializer(result_page, many=True)
 
         total_pages = paginator.page.paginator.num_pages
-    
-        return paginator.get_paginated_response(serializer.data)
+
+        return render(request, 'books.html', {
+            'books': serializer.data,
+            'total_pages': range(1, total_pages + 1),
+            'next_link': paginator.get_next_link(),
+            'prev_link': paginator.get_previous_link(),
+            'perpage': perPage,
+        })
+        # return paginator.get_paginated_response(serializer.data)
     
 class BookCreate(APIView):
     def get(self,request):
-        return Response({
-            'detail': 'Add a book to the list.'
-        })
+        return render(request, 'createBook.html')
     
     def post(self, request):
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            print(serializer.data)
+            return render(request, 'editBook.html', {'book': serializer.data, 'pk': serializer.data['id'], 'created':True})
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return render(request, 'editBook.html', {'book': serializer.data, 'pk': serializer.data['id'], 'error':True})
         
 class Book(APIView):
     def get_book_by_pk(self, pk):
@@ -63,22 +70,18 @@ class Book(APIView):
     def get(self, request, pk):
         bookObject = self.get_book_by_pk(pk)
         serializer = BookSerializer(bookObject)
-        return Response(serializer.data)
+        return render(request, 'editBook.html', {'book': serializer.data, 'pk': pk})
     
-    def put(self, request, pk):
-        bookObject = self.get_book_by_pk(pk)
-        serializer = BookSerializer(bookObject, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+    def post(self, request, pk, edit):
+        if edit:
+            bookObject = self.get_book_by_pk(pk)
+            serializer = BookSerializer(bookObject, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return render(request, 'editBook.html', {'book': serializer.data, 'pk': pk, 'saved':True})
+            else:
+                return render(request, 'editBook.html', {'book': serializer.data, 'pk': pk, 'error':True})
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-    def delete(self, request, pk):
-        bookObject = self.get_book_by_pk(pk)
-        bookObject.delete()
-        return Response(
-            {
-                'detail': 'Book Deleted.'
-            }
-        )
+            bookObject = self.get_book_by_pk(pk)
+            bookObject.delete()
+            return redirect('/books')
