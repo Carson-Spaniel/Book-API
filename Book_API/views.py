@@ -4,33 +4,42 @@ from .serializer import BookSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status
-from django.core.paginator import Paginator, EmptyPage
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Q
 
 # Create your views here.
 
 class BookList(APIView):
     def get(self,request):
         bookObjects = BookObject.objects.all().order_by('pk')
+
+        # Getting search parameters
         searchTitle = request.query_params.get('search')
         searchAuthor = request.query_params.get('author')
         perPage = request.query_params.get('perpage', default=2)
-        page = request.query_params.get('page', default=1)
 
-        if searchTitle and not searchAuthor:
-            bookObjects = bookObjects.filter(title__icontains=searchTitle)
-        elif searchAuthor and not searchTitle:
-            bookObjects = bookObjects.filter(author__icontains=searchAuthor)
-        elif searchAuthor and searchTitle:
-            bookObjects = bookObjects.filter(title__icontains=searchTitle, author__icontains=searchAuthor)
+        # Filtering
+        filter_conditions = Q()
 
-        paginator = Paginator(bookObjects, per_page=perPage)
-        try:
-            bookObjects = paginator.page(number=page)
-        except EmptyPage:
-            bookObjects = []
+        if searchTitle:
+            filter_conditions &= Q(title__icontains=searchTitle)
+        if searchAuthor:
+            filter_conditions &= Q(author__icontains=searchAuthor)
 
-        serializer = BookSerializer(bookObjects, many=True)
-        return Response(serializer.data)
+        bookObjects = bookObjects.filter(filter_conditions)
+
+        # Paginating
+        paginator = PageNumberPagination()
+        paginator.page_size = perPage
+
+        result_page = paginator.paginate_queryset(bookObjects, request)
+
+        # Serializing
+        serializer = BookSerializer(result_page, many=True)
+
+        total_pages = paginator.page.paginator.num_pages
+    
+        return paginator.get_paginated_response(serializer.data)
     
 class BookCreate(APIView):
     def get(self,request):
