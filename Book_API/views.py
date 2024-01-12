@@ -10,13 +10,18 @@ from django.core.paginator import Paginator, EmptyPage
 
 class BookList(APIView):
     def get(self,request):
-        bookObjects = BookObject.objects.all()
-        search = request.query_params.get('search')
+        bookObjects = BookObject.objects.all().order_by('pk')
+        searchTitle = request.query_params.get('search')
+        searchAuthor = request.query_params.get('author')
         perPage = request.query_params.get('perpage', default=2)
         page = request.query_params.get('page', default=1)
 
-        if search:
-            bookObjects = bookObjects.filter(title__icontains=search)
+        if searchTitle and not searchAuthor:
+            bookObjects = bookObjects.filter(title__icontains=searchTitle)
+        elif searchAuthor and not searchTitle:
+            bookObjects = bookObjects.filter(author__icontains=searchAuthor)
+        elif searchAuthor and searchTitle:
+            bookObjects = bookObjects.filter(title__icontains=searchTitle, author__icontains=searchAuthor)
 
         paginator = Paginator(bookObjects, per_page=perPage)
         try:
