@@ -57,7 +57,6 @@ class BookCreate(APIView):
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            print(serializer.data)
             return render(request, 'editBook.html', {'book': serializer.data, 'pk': serializer.data['id'], 'created':True})
         else:
             return render(request, 'editBook.html', {'book': serializer.data, 'pk': serializer.data['id'], 'error':True})
