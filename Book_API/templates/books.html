@@ -129,7 +129,6 @@
 
 <form action="" method="get"> 
     <input type="search" placeholder="Search Books or Authors" name="search">
-    <input type="submit" value="Submit">
     <label for="per_page">Books per Page:</label>
     <select id="per_page" name="perpage">
         <option value="1">1</option>
@@ -137,6 +136,7 @@
         <option value="5">5</option>
         <option value="10">10</option>
     </select>
+    <input type="submit" value="Submit">
 </form>
 
 <!-- Your Book List Display Goes Here -->
@@ -144,9 +144,9 @@
     {% for book in books %}
         <a href="{% url 'find' pk=book.id %}" class="hiddenA">
             <div class="bookItem">
-                <h3 contenteditable="true">{{ book.title }}</h3>
-                <p class="author" contenteditable="true">by {{ book.author }}</p>
-                <p class="pages" contenteditable="true">Pages: {{ book.pages }}</p>
+                <h3>{{ book.title }}</h3>
+                <p class="author">by {{ book.author }}</p>
+                <p class="pages">Pages: {{ book.pages }}</p>
             </div>
         </a>
     {% endfor %}
