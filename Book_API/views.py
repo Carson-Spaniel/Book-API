@@ -47,7 +47,6 @@ class BookList(APIView):
             'prev_link': paginator.get_previous_link(),
             'perpage': perPage,
         })
-        # return paginator.get_paginated_response(serializer.data)
     
 class BookCreate(APIView):
     def get(self,request):
