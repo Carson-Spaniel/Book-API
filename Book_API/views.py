@@ -5,9 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
-from rest_framework.exceptions import Throttled
-
-from django.http import HttpResponseNotFound
+from django.views.generic import TemplateView
 
 TEMPLATE_DIRS = (
     'os.path.join(BASE_DIR, "templates"),'
@@ -15,14 +13,9 @@ TEMPLATE_DIRS = (
 
 # Create your views here.
 
-class CustomRateThrottle(AnonRateThrottle, UserRateThrottle):
-    def allow_request(self, request, view):
-        if super().allow_request(request, view):
-            print('Allowing request')
-            return True
-        self.wait()
-        print('Throttling request')
-        return False
+class Login(TemplateView):
+    def get(self, request):
+        return render(request, 'login.html') 
 
 def handler404(request, exception):
     return render(request, '404.html', status=404)
@@ -31,12 +24,7 @@ def handler500(request):
     return render(request, '500.html', status=500)
 
 class BookList(APIView):
-    throttle_classes = [CustomRateThrottle]
-    def throttled(self, request, wait):
-        print('entering')
-        retry_after = int(wait.seconds)
-        print(f'{retry_after} seconds')
-        return render(request, '429.html', {'retry_after': retry_after}, status=429)
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get(self,request):
         bookObjects = BookObject.objects.all().order_by('title')
@@ -73,6 +61,8 @@ class BookList(APIView):
         })
     
 class BookCreate(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self,request):
         return render(request, 'createBook.html')
     
@@ -85,6 +75,8 @@ class BookCreate(APIView):
             return render(request, 'editBook.html', {'book': serializer.data, 'pk': serializer.data['id'], 'error':True})
         
 class Book(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get_book_by_pk(self, pk):
         bookObject = get_object_or_404(BookObject, pk=pk)
         return bookObject

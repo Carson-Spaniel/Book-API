@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Sign Up</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .switch {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .switch a {
+            text-decoration: none;
+            padding: 8px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .switch a:hover {
+            background-color: #2980b9;
+        }
+
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loginForm">
+    <form action="" method="post" onsubmit="return validateLogin()">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Login">
+    </form>
+    <div class="switch">
+        <a href="#" onclick="toggleForm()">Switch to Sign Up</a>
+    </div>
+</div>
+
+<div id="signupForm" style="display: none;">
+    <form action="" method="post" onsubmit="return validateSignup()">
+        <label for="newUsername">New Username:</label>
+        <input type="text" id="newUsername" name="newUsername" required>
+        <label for="newPassword">New Password:</label>
+        <input type="password" id="newPassword" name="newPassword" required>
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+        <div class="error" id="passwordError"></div>
+        <input type="submit" value="Sign Up">
+    </form>
+    <div class="switch">
+        <a href="#" onclick="toggleForm()">Switch to Login</a>
+    </div>
+</div>
+
+<script>
+    function toggleForm() {
+        var loginForm = document.getElementById('loginForm');
+        var signupForm = document.getElementById('signupForm');
+
+        if (loginForm.style.display === 'none') {
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+        } else {
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'block';
+        }
+    }
+
+    function validateSignup() {
+        var password = document.getElementById('newPassword').value;
+        var confirmPassword = document.getElementById('confirmPassword').value;
+        var passwordError = document.getElementById('passwordError');
+
+        if (password !== confirmPassword) {
+            passwordError.innerHTML = 'Passwords do not match';
+            return false;
+        } else {
+            passwordError.innerHTML = '';
+            return true;
+        }
+    }
+
+    function validateLogin() {
+        // Add additional validation logic for login if needed
+        return true;
+    }
+</script>
+
+</body>
+</html>
