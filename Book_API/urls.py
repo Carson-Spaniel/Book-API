@@ -8,3 +8,6 @@ urlpatterns = [
     path('<int:pk>/<int:edit>/', views.Book.as_view(), name='edit'),
     path('<int:pk>/<int:delete>/', views.Book.as_view(), name='delete'),
 ]
+
+handler404 = 'Book_API.views.handler404'
+handler500 = 'Book_API.views.handler500'

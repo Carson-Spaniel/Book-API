@@ -4,8 +4,10 @@ from django.shortcuts import get_object_or_404, render, redirect
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
-
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from rest_framework.exceptions import Throttled
+
+from django.http import HttpResponseNotFound
 
 TEMPLATE_DIRS = (
     'os.path.join(BASE_DIR, "templates"),'
@@ -13,8 +15,27 @@ TEMPLATE_DIRS = (
 
 # Create your views here.
 
+class CustomRateThrottle(AnonRateThrottle, UserRateThrottle):
+    def allow_request(self, request, view):
+        if super().allow_request(request, view):
+            return True
+        self.wait()
+        return False
+
+def handler404(request, exception):
+    return render(request, '404.html', status=404)
+
+def handler500(request):
+    return render(request, '500.html', status=500)
+
 class BookList(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+    throttle_classes = [CustomRateThrottle]
+
+    def throttled(self, request, wait):
+        retry_after = int(wait)
+        print(f'{retry_after} seconds')
+        return render(request, '429.html', {'retry_after': retry_after}, status=429)
+
     def get(self,request):
         bookObjects = BookObject.objects.all().order_by('title')
 
