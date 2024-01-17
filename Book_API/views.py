@@ -1,11 +1,11 @@
 from .models import BookObject
-from rest_framework.response import Response
 from .serializer import BookSerializer
 from django.shortcuts import get_object_or_404, render, redirect
 from rest_framework.views import APIView
-from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
+
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 TEMPLATE_DIRS = (
     'os.path.join(BASE_DIR, "templates"),'
@@ -14,6 +14,7 @@ TEMPLATE_DIRS = (
 # Create your views here.
 
 class BookList(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
     def get(self,request):
         bookObjects = BookObject.objects.all().order_by('title')
 
