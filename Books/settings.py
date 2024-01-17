@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-guni42a#dkijc)dm_so$(%o(nmxjxqfzm=s&*h05l=nohuk#y%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -146,7 +146,7 @@ REST_FRAMEWORK = {
     # ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '4/minute',
-        'user': '100/minute',
+        'user': '4/minute',
     },
     'DEFAULT_AUTHENTICATION_CLASSES':[
         'rest_framework.authentication.TokenAuthentication',

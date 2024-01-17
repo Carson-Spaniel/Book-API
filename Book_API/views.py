@@ -18,8 +18,10 @@ TEMPLATE_DIRS = (
 class CustomRateThrottle(AnonRateThrottle, UserRateThrottle):
     def allow_request(self, request, view):
         if super().allow_request(request, view):
+            print('Allowing request')
             return True
         self.wait()
+        print('Throttling request')
         return False
 
 def handler404(request, exception):
@@ -30,9 +32,9 @@ def handler500(request):
 
 class BookList(APIView):
     throttle_classes = [CustomRateThrottle]
-
     def throttled(self, request, wait):
-        retry_after = int(wait)
+        print('entering')
+        retry_after = int(wait.seconds)
         print(f'{retry_after} seconds')
         return render(request, '429.html', {'retry_after': retry_after}, status=429)
 
