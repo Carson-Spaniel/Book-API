@@ -7,6 +7,7 @@ from django.db.models import Q
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.response import Response
 from django.urls import reverse
+from django.db.models.functions import Lower
 
 # Create your views here.
 
@@ -14,7 +15,7 @@ class BookList(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get(self, request):
-        bookObjects = BookObject.objects.all().order_by('title')
+        bookObjects = BookObject.objects.all().order_by(Lower('title'))
 
         # Getting search parameters
         searchQuery = request.query_params.get('search')
@@ -61,8 +62,8 @@ class BookCreate(APIView):
         pages = request.data.get('pages', [''])[0]
 
         data={
-            'title':title,
-            'author':author,
+            'title':title.title(),
+            'author':author.title(),
             'pages':pages
         }
 
@@ -92,8 +93,8 @@ class Book(APIView):
         pages = request.data.get('pages', [''])[0]
 
         data={
-            'title':title,
-            'author':author,
+            'title':title.title(),
+            'author':author.title(),
             'pages':pages
         }
 

@@ -7,7 +7,6 @@ from django.middleware.csrf import get_token
 import json
 from django.conf import settings
 import os
-from django.http import HttpResponse
 
 TEMPLATE_DIRS = [
     os.path.join(settings.BASE_DIR, "templates"),
