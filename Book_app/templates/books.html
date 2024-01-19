@@ -172,9 +172,7 @@
     </div>
     
     <div id="pageButtons">
-        {% for page_num in total_pages %}
-            <a href="?page={{ page_num }}&perpage={{ perpage }}">{{ page_num }}</a>
-        {% endfor %}
+        Page {{page_num}} of {{page_range}}
     </div>
 
     <div>

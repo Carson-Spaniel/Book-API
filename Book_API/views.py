@@ -39,6 +39,7 @@ class BookList(APIView):
         serializer = BookSerializer(result_page, many=True)
 
         total_pages = paginator.page.paginator.num_pages
+        current_page = paginator.page.number
 
         # Get the base URL without any query parameters
         base_url = reverse('list')
@@ -46,6 +47,8 @@ class BookList(APIView):
         data = {
             'books': serializer.data,
             'total_pages': list(range(1, total_pages + 1)),
+            'page_num': current_page,
+            'page_range':total_pages,
             'next_link': f"{base_url}?{request.GET.urlencode()}&page={paginator.page.next_page_number()}" if paginator.page.has_next() else None,
             'prev_link': f"{base_url}?{request.GET.urlencode()}&page={paginator.page.previous_page_number()}" if paginator.page.has_previous() else None,
             'perpage': perPage,

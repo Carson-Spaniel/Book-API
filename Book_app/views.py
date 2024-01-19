@@ -19,23 +19,19 @@ def index(request):
 
 def get_api_data(http_method, url, data=None, request=None):
     if http_method == 'GET':
-        response = requests.get(url, data=data, headers={
-            'Content-Type': 'application/json',
-        })
+        response = requests.get(url)
     elif http_method == 'POST':
         csrf_token = get_token(request)
         headers={
             'Content-Type': 'application/json',
             'X-CSRFToken': csrf_token,
         }
-        # Adjust headers and data based on your API requirements
         response = requests.post(url, data=data, headers=headers)
 
-    # Check if the request was successful (status code 200)
     if response.status_code == 200:
-        return response.json()  # Assuming the API returns JSON data
+        return response.json()
     else:
-        return None  # Handle error cases or return an appropriate default value
+        return None
 
 class Login(TemplateView):
     def get(self, request):
