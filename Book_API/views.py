@@ -1,32 +1,19 @@
 from .models import BookObject
 from .serializer import BookSerializer
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
-from django.views.generic import TemplateView
-
-TEMPLATE_DIRS = (
-    'os.path.join(BASE_DIR, "templates"),'
-)
+from rest_framework.response import Response
+from django.urls import reverse
 
 # Create your views here.
-
-class Login(TemplateView):
-    def get(self, request):
-        return render(request, 'login.html') 
-
-def handler404(request, exception):
-    return render(request, '404.html', status=404)
-
-def handler500(request):
-    return render(request, '500.html', status=500)
 
 class BookList(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
-    def get(self,request):
+    def get(self, request):
         bookObjects = BookObject.objects.all().order_by('title')
 
         # Getting search parameters
@@ -52,27 +39,40 @@ class BookList(APIView):
 
         total_pages = paginator.page.paginator.num_pages
 
-        return render(request, 'books.html', {
+        # Get the base URL without any query parameters
+        base_url = reverse('list')
+
+        data = {
             'books': serializer.data,
-            'total_pages': range(1, total_pages + 1),
-            'next_link': paginator.get_next_link(),
-            'prev_link': paginator.get_previous_link(),
+            'total_pages': list(range(1, total_pages + 1)),
+            'next_link': f"{base_url}?{request.GET.urlencode()}&page={paginator.page.next_page_number()}" if paginator.page.has_next() else None,
+            'prev_link': f"{base_url}?{request.GET.urlencode()}&page={paginator.page.previous_page_number()}" if paginator.page.has_previous() else None,
             'perpage': perPage,
-        })
+        }
+
+        return Response(data)
     
 class BookCreate(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
-
-    def get(self,request):
-        return render(request, 'createBook.html')
     
     def post(self, request):
-        serializer = BookSerializer(data=request.data)
+        title = request.data.get('title', [''])[0]
+        author = request.data.get('author', [''])[0]
+        pages = request.data.get('pages', [''])[0]
+
+        data={
+            'title':title,
+            'author':author,
+            'pages':pages
+        }
+
+        serializer = BookSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
-            return render(request, 'editBook.html', {'book': serializer.data, 'pk': serializer.data['id'], 'created':True})
+            return Response({'book': serializer.data, 'pk': serializer.data['id'], 'created':True})
         else:
-            return render(request, 'editBook.html', {'book': serializer.data, 'pk': serializer.data['id'], 'error':True})
+            return Response({'book': serializer.data, 'pk': serializer.data['id'], 'error':True})
         
 class Book(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
@@ -84,18 +84,28 @@ class Book(APIView):
     def get(self, request, pk):
         bookObject = self.get_book_by_pk(pk)
         serializer = BookSerializer(bookObject)
-        return render(request, 'editBook.html', {'book': serializer.data, 'pk': pk})
+        return Response({'book': serializer.data, 'pk': pk})
     
     def post(self, request, pk, edit):
+        title = request.data.get('title', [''])[0]
+        author = request.data.get('author', [''])[0]
+        pages = request.data.get('pages', [''])[0]
+
+        data={
+            'title':title,
+            'author':author,
+            'pages':pages
+        }
+
         if edit:
             bookObject = self.get_book_by_pk(pk)
-            serializer = BookSerializer(bookObject, data=request.data)
+            serializer = BookSerializer(bookObject, data=data)
             if serializer.is_valid():
                 serializer.save()
-                return render(request, 'editBook.html', {'book': serializer.data, 'pk': pk, 'saved':True})
+                return Response({'book': serializer.data, 'pk': pk, 'saved':True})
             else:
-                return render(request, 'editBook.html', {'book': serializer.data, 'pk': pk, 'error':True})
+                return Response({'book': serializer.data, 'pk': pk, 'error':True})
         else:
             bookObject = self.get_book_by_pk(pk)
             bookObject.delete()
-            return redirect('/books')
+            return Response({'detail':'book deleted'})

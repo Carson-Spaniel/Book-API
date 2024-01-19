@@ -141,15 +141,21 @@
 
 <!-- Your Book List Display Goes Here -->
 <div id="bookList">
-    {% for book in books %}
-        <a href="{% url 'find' pk=book.id %}" class="hiddenA">
-            <div class="bookItem">
-                <h3>{{ book.title }}</h3>
-                <p class="author">by {{ book.author }}</p>
-                <p class="pages">Pages: {{ book.pages }}</p>
-            </div>
-        </a>
-    {% endfor %}
+    {% if books %}
+        {% for book in books %}
+            <a href="{% url 'find' pk=book.id %}" class="hiddenA">
+                <div class="bookItem">
+                    <h3>{{ book.title }}</h3>
+                    <p class="author">by {{ book.author }}</p>
+                    <p class="pages">Pages: {{ book.pages }}</p>
+                </div>
+            </a>
+        {% endfor %}
+    {% else %}
+        <div class="bookItem">
+            <h3>Error Retrieving Books</h3>
+        </div>
+    {% endif %}
 </div>
 
 <!-- Create Button -->

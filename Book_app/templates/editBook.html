@@ -86,7 +86,7 @@
 {% endif %}
 
 <form action="{% url 'edit' pk=pk edit=1 %}" method="post">
-    <!-- {% csrf_token %} -->
+    {% csrf_token %}
     <label for="title">Title:</label>
     <input type="text" id="title" name="title" value="{{ book.title }}" required>
 

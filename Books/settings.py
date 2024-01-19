@@ -10,6 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+'''
+username = admin
+password = Book
+'''
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +30,7 @@ SECRET_KEY = 'django-insecure-guni42a#dkijc)dm_so$(%o(nmxjxqfzm=s&*h05l=nohuk#y%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', "*"]
 
 
 # Application definition
@@ -37,8 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Book_API',
     'rest_framework',
+    'Book_API',
+    'Book_app',
 ]
 
 MIDDLEWARE = [
@@ -145,8 +151,8 @@ REST_FRAMEWORK = {
     #     "rest_framework.permissions.DjangoModelPermissions",
     # ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '4/minute',
-        'user': '4/minute',
+        'anon': '30/minute',
+        'user': '50/minute',
     },
     'DEFAULT_AUTHENTICATION_CLASSES':[
         'rest_framework.authentication.TokenAuthentication',
