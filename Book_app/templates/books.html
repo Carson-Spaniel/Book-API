@@ -134,12 +134,12 @@
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="5">5</option>
-        <option value="10">10</option>
+        <!-- <option value="10">10</option> -->
     </select>
     <input type="submit" value="Submit">
 </form>
 
-<!-- Your Book List Display Goes Here -->
+<!-- Book List -->
 <div id="bookList">
     {% if books %}
         {% for book in books %}
@@ -171,9 +171,11 @@
         {% endif %}
     </div>
     
-    <div id="pageButtons">
-        Page {{page_num}} of {{page_range}}
-    </div>
+    {% if page_num %}
+        <div id="pageButtons">
+            Page {{page_num}} of {{page_range}}
+        </div>
+    {% endif %}
 
     <div>
         {% if next_link %}
