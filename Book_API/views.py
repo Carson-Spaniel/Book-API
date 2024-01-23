@@ -1,7 +1,7 @@
 from .models import BookObject
 from .serializer import BookSerializer
 from django.shortcuts import get_object_or_404
-from rest_framework.views import View, APIView
+from rest_framework.views import APIView
 from django.core.paginator import Paginator
 from django.db.models import Q
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
@@ -11,7 +11,7 @@ from django.http import JsonResponse
 
 # Create your views here.
 
-class BookList(View):
+class BookList(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get(self, request):
